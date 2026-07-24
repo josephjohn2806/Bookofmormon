@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journey of Faith — A Book of Mormon Adventure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sand:#E4C89A;
+    --sand-dark:#C9A96A;
+    --ink-night:#1E2438;
+    --gold:#C9A227;
+    --gold-bright:#F0D883;
+    --ocean:#2B6E76;
+    --ocean-deep:#1B4B52;
+    --jungle:#3F6B4A;
+    --jungle-deep:#2C4E36;
+    --ember:#A9491C;
+    --parchment:#F6ECD6;
+    --parchment-edge:#E4D3A8;
+    --ink:#2B2013;
+    --ink-soft:#5C4A2E;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Crimson Text', serif;
+    background:var(--ink-night);
+    color:var(--parchment);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:20px 28px 14px;
+    max-width:1000px;
+    margin:0 auto;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .title-block h1{
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size:clamp(22px, 4vw, 34px);
+    margin:0;
+    letter-spacing:0.5px;
+    color:var(--gold-bright);
+    text-shadow:0 2px 10px rgba(0,0,0,0.4);
+  }
+  .title-block p{
+    margin:4px 0 0;
+    font-family:'Inter', sans-serif;
+    font-size:12px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:#9FA6C4;
+  }
+  .plates-tally{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(0,0,0,0.25);
+    border:1px solid rgba(201,162,39,0.4);
+    padding:8px 14px;
+    border-radius:999px;
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    font-weight:600;
+    color:var(--gold-bright);
+  }
+  .plates-tally .plate-icon{
+    width:18px;height:18px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold) 60%, #8a7418 100%);
+    box-shadow:0 0 6px rgba(240,216,131,0.7);
+    display:inline-block;
+  }
+
+  /* ---------- Map ---------- */
+  .map-wrap{
+    max-width:1000px;
+    margin:0 auto 40px;
+    padding:0 16px;
+  }
+  .map-frame{
+    position:relative;
+    width:100%;
+    aspect-ratio:960/720;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(201,162,39,0.35);
+    background:
+      radial-gradient(ellipse at 50% 6%, #4a3f7a 0%, transparent 55%),
+      linear-gradient(200deg,
+        #6b5322 0%,
+        #8a6a2e 12%,
+        var(--sand-dark) 22%,
+        var(--ocean-deep) 42%,
+        var(--ocean) 50%,
+        var(--jungle-deep) 62%,
+        var(--jungle) 70%,
+        #5a4b1f 84%,
+        #2c2440 100%);
+  }
+  .map-frame::before{
+    /* subtle star field near top */
+    content:"";
+    position:absolute; inset:0 0 60% 0;
+    background-image:
+      radial-gradient(1.5px 1.5px at 20% 20%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1.5px 1.5px at 70% 10%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1px 1px at 45% 30%, rgba(255,255,255,0.35), transparent),
+      radial-gradient(1px 1px at 85% 25%, rgba(255,255,255,0.3), transparent),
+      radial-gradient(1.5px 1.5px at 10% 8%, rgba(255,255,255,0.4), transparent);
+    pointer-events:none;
+    opacity:0.8;
+  }
+
+  svg.trail-svg{
+    position:absolute; inset:0; width:100%; height:100%;
+  }
+  .trail-path{
+    fill:none;
+    stroke:var(--gold);
+    stroke-width:6;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    filter:drop-shadow(0 0 4px rgba(240,216,131,0.5));
+    stroke-dasharray:3400;
+    stroke-dashoffset:3400;
+    animation:drawTrail 3.2s ease forwards 0.3s;
+  }
+  @keyframes drawTrail{ to{ stroke-dashoffset:0; } }
+
+  .waypoint{
+    position:absolute;
+    width:64px; height:64px;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    border:3px solid var(--gold);
+    background:radial-gradient(circle at 35% 30%, #fff7dd, var(--parchment) 55%, var(--parchment-edge) 100%);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    box-shadow:0 4px 14px rgba(0,0,0,0.45);
+    transition:transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .waypoint svg{ width:30px; height:30px; }
+  .waypoint:hover{ transform:translate(-50%,-50%) scale(1.08); }
+  .waypoint.locked{
+    cursor:not-allowed;
+    filter:grayscale(0.8) brightness(0.55);
+    border-color:#6b6355;
+  }
+  .waypoint.locked:hover{ transform:translate(-50%,-50%); }
+  .waypoint.unlocked{
+    animation:pulseGlow 1.8s ease-in-out infinite;
+  }
+  .waypoint.completed{
+    border-color:var(--gold-bright);
+    background:radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold) 70%, #8a7418 100%);
+  }
+  .waypoint.completed svg{ filter:brightness(0.25); }
+  @keyframes pulseGlow{
+    0%,100%{ box-shadow:0 4px 14px rgba(0,0,0,0.45), 0 0 0 0 rgba(240,216,131,0.55); }
+    50%{ box-shadow:0 4px 14px rgba(0,0,0,0.45), 0 0 0 12px rgba(240,216,131,0); }
+  }
+  .waypoint-label{
+    position:absolute;
+    top:100%; left:50%; transform:translateX(-50%);
+    margin-top:6px;
+    font-family:'Inter', sans-serif;
+    font-size:11px; font-weight:600;
+    color:#F6ECD6;
+    text-align:center;
+    width:110px;
+    text-shadow:0 1px 3px rgba(0,0,0,0.8);
+    pointer-events:none;
+  }
+  .start-marker{
+    position:absolute; transform:translate(-50%,-50%);
+    font-family:'Cinzel', serif;
+    font-size:12px; letter-spacing:1px;
+    color:var(--gold-bright);
+    text-shadow:0 1px 4px rgba(0,0,0,0.8);
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+  }
+  .start-marker .dot{
+    width:14px; height:14px; border-radius:50%;
+    background:var(--gold-bright);
+    box-shadow:0 0 8px rgba(240,216,131,0.8);
+  }
+
+  /* ---------- Modal ---------- */
+  .overlay{
+    position:fixed; inset:0;
+    background:rgba(10,8,20,0.72);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+    z-index:50;
+    opacity:0; pointer-events:none;
+    transition:opacity 0.25s ease;
+  }
+  .overlay.open{ opacity:1; pointer-events:auto; }
+  .scroll-card{
+    background:var(--parchment);
+    color:var(--ink);
+    max-width:480px; width:100%;
+    border-radius:10px;
+    border:2px solid var(--gold);
+    box-shadow:0 30px 80px rgba(0,0,0,0.6), 0 0 0 6px rgba(201,162,39,0.15);
+    padding:28px 26px 24px;
+    transform:scale(0.9) translateY(20px);
+    opacity:0;
+    transition:transform 0.35s cubic-bezier(.2,.9,.3,1.2), opacity 0.3s ease;
+    max-height:88vh;
+    overflow-y:auto;
+  }
+  .overlay.open .scroll-card{ transform:scale(1) translateY(0); opacity:1; }
+  .scroll-card .eyebrow{
+    font-family:'Inter', sans-serif;
+    font-size:11px; letter-spacing:2px; text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 6px;
+  }
+  .scroll-card h2{
+    font-family:'Cinzel', serif;
+    font-size:24px; margin:0 0 14px;
+    color:var(--ember);
+    line-height:1.25;
+  }
+  .scroll-card p.story{
+    font-size:18px; line-height:1.55;
+    margin:0 0 20px;
+  }
+  .quiz-q{
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    margin:0 0 12px;
+    color:var(--ink);
+  }
+  .quiz-options{ display:flex; flex-direction:column; gap:8px; margin-bottom:6px; }
+  .quiz-options button{
+    font-family:'Inter', sans-serif;
+    font-size:14.5px;
+    text-align:left;
+    padding:11px 14px;
+    border-radius:8px;
+    border:1.5px solid var(--sand-dark);
+    background:#fffdf7;
+    color:var(--ink);
+    cursor:pointer;
+    transition:background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+  .quiz-options button:hover:not(:disabled){ border-color:var(--gold); background:#fff8e6; }
+  .quiz-options button:disabled{ cursor:default; }
+  .quiz-options button.correct{ background:#e4f0dd; border-color:#5a8a4b; }
+  .quiz-options button.incorrect{ background:#f2ded6; border-color:var(--ember); }
+
+  .feedback{
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    margin:14px 0 4px;
+    padding:10px 12px;
+    border-radius:8px;
+    display:none;
+  }
+  .feedback.show{ display:block; }
+  .feedback.good{ background:#e4f0dd; color:#2f4a25; }
+  .feedback.bad{ background:#f2ded6; color:#6b2c0f; }
+
+  .plate-earned{
+    display:none;
+    align-items:center; gap:8px;
+    font-family:'Inter', sans-serif; font-size:13px; font-weight:600;
+    color:var(--ink-soft); margin-top:10px;
+  }
+  .plate-earned.show{ display:flex; animation:popIn 0.4s ease; }
+  @keyframes popIn{ from{ transform:scale(0.5); opacity:0; } to{ transform:scale(1); opacity:1; } }
+
+  .modal-actions{
+    display:flex; justify-content:flex-end; gap:10px; margin-top:18px;
+  }
+  .btn{
+    font-family:'Inter', sans-serif; font-weight:600; font-size:14px;
+    padding:10px 18px; border-radius:8px; border:none; cursor:pointer;
+    transition:transform 0.12s ease, opacity 0.12s ease;
+  }
+  .btn:active{ transform:scale(0.97); }
+  .btn-primary{ background:var(--ember); color:#fdf3e7; }
+  .btn-primary:disabled{ opacity:0.4; cursor:not-allowed; }
+  .btn-ghost{ background:transparent; color:var(--ink-soft); text-decoration:underline; }
+
+  .finale-plates{
+    display:flex; flex-wrap:wrap; gap:6px; margin:14px 0 18px;
+  }
+  .finale-plates span{
+    width:22px; height:22px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold) 60%, #8a7418 100%);
+    box-shadow:0 0 6px rgba(201,162,39,0.6);
+  }
+
+  footer{
+    text-align:center;
+    font-family:'Inter', sans-serif;
+    font-size:12px;
+    color:#7C84A8;
+    padding:10px 20px 32px;
+  }
+
+  /* Locked tooltip */
+  .lock-badge{
+    position:absolute; bottom:-4px; right:-4px;
+    width:20px; height:20px; border-radius:50%;
+    background:#2b2440; border:2px solid #6b6355;
+    display:flex; align-items:center; justify-content:center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-block">
+    <h1>Journey of Faith</h1>
+    <p>An interactive walk through the Book of Mormon</p>
+  </div>
+  <div class="plates-tally">
+    <span class="plate-icon"></span>
+    <span id="plateCount">0</span> / 8 plates of gold
+  </div>
+</header>
+
+<div class="map-wrap">
+  <div class="map-frame" id="mapFrame">
+    <svg class="trail-svg" viewBox="0 0 960 720" preserveAspectRatio="none">
+      <path class="trail-path" d="M 60,650 L 300,650 L 600,650 L 900,650 L 900,470 L 650,470 L 400,470 L 120,470 L 120,300 L 380,300 L 650,300 L 650,110"/>
+    </svg>
+    <!-- start marker -->
+    <div class="start-marker" style="left:6.25%; top:90.3%;">
+      <div class="dot"></div>
+      Jerusalem
+    </div>
+    <!-- waypoints injected by JS -->
+    <div id="waypoints"></div>
+  </div>
+</div>
+
+<footer>Tap a glowing stop along the trail to continue the journey. Complete each stop in order to reach the Promised Land.</footer>
+
+<div class="overlay" id="overlay">
+  <div class="scroll-card" id="scrollCard"></div>
+</div>
+
+<script>
+const chapters = [
+  {
+    id:1, x:300, y:650, label:"Leaving Jerusalem", era:"Jerusalem · about 600 BC",
+    icon:"tent",
+    story:"Lehi warned that Jerusalem was in danger and led his family into the wilderness to find a new home. His sons Nephi, Laman, Lemuel, and Sam left comfort behind, trusting that following this call would keep them safe.",
+    question:"Why did Lehi's family leave Jerusalem?",
+    options:["To search for gold","Because Lehi was warned the city was in danger","To visit distant relatives"],
+    correct:1,
+    good:"That's right — Lehi trusted the warning and led his family to safety.",
+    bad:"Not quite. Lehi left because he was warned that Jerusalem was in danger."
+  },
+  {
+    id:2, x:600, y:650, label:"Nephi Builds a Ship", era:"Land of Bountiful",
+    icon:"ship",
+    story:"Nephi's older brothers doubted he could ever build a ship. But Nephi kept working, asking for guidance at every step, and completed a vessel strong enough to cross the ocean.",
+    question:"What did Nephi rely on most to build the ship?",
+    options:["Old shipbuilding blueprints","Guidance and steady persistence","Help from strangers passing by"],
+    correct:1,
+    good:"Exactly — Nephi's patience and guidance carried the work through.",
+    bad:"Not quite. Nephi relied on guidance and persistence, even without formal plans."
+  },
+  {
+    id:3, x:900, y:650, label:"Voyage Across the Sea", era:"Crossing the ocean",
+    icon:"wave",
+    story:"Partway through the journey, some aboard began to celebrate too wildly and ignore warnings, and a fierce storm arose. The ship was spared once the group humbled themselves and changed course.",
+    question:"What helped calm the storm at sea?",
+    options:["A change of heart and humility","Rowing faster through the waves","Simply waiting it out"],
+    correct:0,
+    good:"Right — humility turned the situation around before harm was done.",
+    bad:"Not quite. It was a change of heart and humility that calmed things."
+  },
+  {
+    id:4, x:650, y:470, label:"Waters of Mormon", era:"Land of Nephi, under King Noah",
+    icon:"drop",
+    story:"Alma took a bold warning to heart and quietly began teaching the same message to others near a hidden place called the Waters of Mormon, where many chose to start fresh.",
+    question:"What took place at the Waters of Mormon?",
+    options:["A battle over the land","A gathering and a new beginning","A trade agreement"],
+    correct:1,
+    good:"Yes — it became a place of renewal and new beginnings.",
+    bad:"Not quite. It was a quiet gathering and a fresh start for many."
+  },
+  {
+    id:5, x:400, y:470, label:"Abinadi's Courage", era:"King Noah's court",
+    icon:"flame",
+    story:"Abinadi spoke difficult truths to a king who did not want to hear them. Even in danger, he refused to take back his words — and his message later changed Alma's life for good.",
+    question:"What stands out most about Abinadi's choice?",
+    options:["He stayed quiet to protect himself","He spoke honestly despite the risk","He left the kingdom quickly"],
+    correct:1,
+    good:"That's it — his honesty, even at risk to himself, is what people remember.",
+    bad:"Not quite. Abinadi chose to speak honestly even though it was risky."
+  },
+  {
+    id:6, x:120, y:470, label:"King Benjamin's Words", era:"City of Zarahemla",
+    icon:"crown",
+    story:"King Benjamin gathered his people and reminded them that caring for one another is one of the most meaningful things a person can do — and he asked them to treat each other with real goodwill.",
+    question:"What was at the heart of King Benjamin's message?",
+    options:["Collecting taxes fairly","Serving and caring for others","Building taller walls"],
+    correct:1,
+    good:"Right — service to others was the center of his message.",
+    bad:"Not quite. His message was really about serving and caring for others."
+  },
+  {
+    id:7, x:380, y:300, label:"Ammon's Service", era:"Land of Ishmael",
+    icon:"hands",
+    story:"Ammon chose to serve quietly as a shepherd for King Lamoni rather than seek status. His steady dedication and courage in protecting the flocks slowly earned the king's trust — and opened his heart.",
+    question:"How did Ammon earn King Lamoni's trust?",
+    options:["Through humble, faithful service","By winning a contest","By offering expensive gifts"],
+    correct:0,
+    good:"Exactly — quiet, faithful service is what won the king over.",
+    bad:"Not quite. It was Ammon's humble, faithful service that earned trust."
+  },
+  {
+    id:8, x:650, y:300, label:"Christ Among the Nephites", era:"After a time of great upheaval",
+    icon:"sun",
+    story:"Following destruction and darkness, a voice was heard from above. Soon after, a figure descended and taught the gathered people, healing the sick and blessing the children one by one.",
+    question:"What did the people experience together?",
+    options:["A long drought","A visit that taught, healed, and blessed them","A trade festival"],
+    correct:1,
+    good:"Yes — it was a moment of teaching, healing, and blessing for everyone there.",
+    bad:"Not quite. It was a visit that brought teaching, healing, and blessing."
+  }
+];
+
+const finale = {
+  id:"finale", x:650, y:110, label:"Moroni's Promise", era:"The final page",
+  icon:"book",
+  story:"At the end of his writing, Moroni leaves an invitation rather than a conclusion: read with an open heart, remember all that came before, and ask sincerely whether it rings true. It's a question handed forward, not a final word."
+};
+
+const ICONS = {
+  tent:'<path d="M12 4 L4 20 H9 L12 12 L15 20 H20 Z" stroke="#5C4A2E" stroke-width="1.6" fill="none" stroke-linejoin="round"/>',
+  ship:'<path d="M4 15 H20 L18 20 H6 Z M12 15 V5 M12 6 L18 9 M8 12 L8 9 H16" stroke="#5C4A2E" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  wave:'<path d="M2 10 Q6 6 10 10 T18 10 T26 10 M2 16 Q6 12 10 16 T18 16 T26 16" stroke="#5C4A2E" stroke-width="1.6" fill="none" stroke-linecap="round"/>',
+  drop:'<path d="M12 3 C12 3 6 12 6 16 A6 6 0 0 0 18 16 C18 12 12 3 12 3 Z" stroke="#5C4A2E" stroke-width="1.6" fill="none" stroke-linejoin="round"/>',
+  flame:'<path d="M12 3 C9 8 5 10 6 15 A6 6 0 0 0 18 15 C19 10 15 8 12 3 Z M12 10 C11 12 10 13 10.5 15 A2.2 2.2 0 0 0 14 15 C14 13 13 12 12 10Z" stroke="#5C4A2E" stroke-width="1.4" fill="none" stroke-linejoin="round"/>',
+  crown:'<path d="M4 18 H20 L18 9 L14 13 L12 7 L10 13 L6 9 Z" stroke="#5C4A2E" stroke-width="1.6" fill="none" stroke-linejoin="round"/>',
+  hands:'<path d="M6 14 C4 12 4 9 6 8 C7 7 9 8 9 9 M18 14 C20 12 20 9 18 8 C17 7 15 8 15 9 M9 9 V15 A3 3 0 0 0 12 18 A3 3 0 0 0 15 15 V9" stroke="#5C4A2E" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  sun:'<circle cx="12" cy="12" r="4.5" stroke="#5C4A2E" stroke-width="1.6" fill="none"/><path d="M12 2 V5 M12 19 V22 M2 12 H5 M19 12 H22 M4.5 4.5 L6.5 6.5 M17.5 17.5 L19.5 19.5 M4.5 19.5 L6.5 17.5 M17.5 6.5 L19.5 4.5" stroke="#5C4A2E" stroke-width="1.6" stroke-linecap="round"/>',
+  book:'<path d="M12 5 C10 4 6 4 4 5 V18 C6 17 10 17 12 18 C14 17 18 17 20 18 V5 C18 4 14 4 12 5 Z M12 5 V18" stroke="#5C4A2E" stroke-width="1.6" fill="none" stroke-linejoin="round"/>'
+};
+
+let completed = new Set();
+let unlockedCount = 1; // chapter 1 always unlocked
+
+function iconSvg(name){
+  return `<svg viewBox="0 0 24 24">${ICONS[name]}</svg>`;
+}
+
+function pct(v, total){ return (v/total*100).toFixed(2)+'%'; }
+
+function renderWaypoints(){
+  const container = document.getElementById('waypoints');
+  container.innerHTML = '';
+  const all = [...chapters, finale];
+  all.forEach((ch, idx)=>{
+    const isFinale = ch.id === 'finale';
+    const chapterIndex = isFinale ? chapters.length : idx; // 0-based
+    const isCompleted = completed.has(ch.id);
+    const isUnlocked = isFinale ? completed.size === chapters.length : chapterIndex < unlockedCount;
+    const wrap = document.createElement('div');
+    wrap.className = 'waypoint ' + (isCompleted ? 'completed' : (isUnlocked ? 'unlocked' : 'locked'));
+    wrap.style.left = pct(ch.x, 960);
+    wrap.style.top = pct(ch.y, 720);
+    wrap.innerHTML = iconSvg(ch.icon) + `<div class="waypoint-label">${ch.label}</div>` + (!isUnlocked ? '<div class="lock-badge">🔒</div>' : '');
+    if(isUnlocked){
+      wrap.addEventListener('click', ()=> openChapter(ch, isFinale));
+    }
+    container.appendChild(wrap);
+  });
+}
+
+function openChapter(ch, isFinale){
+  const overlay = document.getElementById('overlay');
+  const card = document.getElementById('scrollCard');
+
+  if(isFinale){
+    card.innerHTML = `
+      <p class="eyebrow">${ch.era}</p>
+      <h2>${ch.label}</h2>
+      <p class="story">${ch.story}</p>
+      <p class="story">You've walked the whole trail and gathered every plate of gold. Well done.</p>
+      <div class="finale-plates">${Array.from({length:8}).map(()=>'<span></span>').join('')}</div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="closeBtn">Close</button>
+        <button class="btn btn-primary" id="replayBtn">Play again</button>
+      </div>
+    `;
+    document.getElementById('closeBtn').addEventListener('click', closeModal);
+    document.getElementById('replayBtn').addEventListener('click', ()=>{
+      completed.clear();
+      unlockedCount = 1;
+      document.getElementById('plateCount').textContent = '0';
+      renderWaypoints();
+      closeModal();
+    });
+    overlay.classList.add('open');
+    return;
+  }
+
+  const alreadyDone = completed.has(ch.id);
+  card.innerHTML = `
+    <p class="eyebrow">${ch.era}</p>
+    <h2>${ch.label}</h2>
+    <p class="story">${ch.story}</p>
+    <p class="quiz-q">${ch.question}</p>
+    <div class="quiz-options" id="quizOptions"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="plate-earned" id="plateEarned">✨ A plate of gold has been added to your collection.</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="closeBtn">Close</button>
+      <button class="btn btn-primary" id="continueBtn" disabled>Continue</button>
+    </div>
+  `;
+
+  const optWrap = document.getElementById('quizOptions');
+  ch.options.forEach((opt, i)=>{
+    const b = document.createElement('button');
+    b.textContent = opt;
+    if(alreadyDone) b.disabled = true;
+    b.addEventListener('click', ()=> handleAnswer(ch, i, optWrap, alreadyDone));
+    optWrap.appendChild(b);
+  });
+
+  if(alreadyDone){
+    document.getElementById('feedback').textContent = ch.good;
+    document.getElementById('feedback').classList.add('show','good');
+    document.getElementById('continueBtn').disabled = false;
+    // mark the correct one visually
+  }
+
+  document.getElementById('closeBtn').addEventListener('click', closeModal);
+  document.getElementById('continueBtn').addEventListener('click', ()=>{
+    markComplete(ch);
+    closeModal();
+  });
+
+  document.getElementById('overlay').classList.add('open');
+}
+
+function handleAnswer(ch, chosenIndex, optWrap, alreadyDone){
+  if(alreadyDone) return;
+  const buttons = optWrap.querySelectorAll('button');
+  buttons.forEach(b=> b.disabled = true);
+  const feedback = document.getElementById('feedback');
+  const plateEarned = document.getElementById('plateEarned');
+  const continueBtn = document.getElementById('continueBtn');
+
+  if(chosenIndex === ch.correct){
+    buttons[chosenIndex].classList.add('correct');
+    feedback.textContent = ch.good;
+    feedback.classList.add('show','good');
+    plateEarned.classList.add('show');
+  } else {
+    buttons[chosenIndex].classList.add('incorrect');
+    buttons[ch.correct].classList.add('correct');
+    feedback.textContent = ch.bad;
+    feedback.classList.add('show','bad');
+    plateEarned.classList.add('show');
+  }
+  continueBtn.disabled = false;
+}
+
+function markComplete(ch){
+  if(!completed.has(ch.id)){
+    completed.add(ch.id);
+    document.getElementById('plateCount').textContent = completed.size;
+    unlockedCount = Math.max(unlockedCount, chapters.findIndex(c=>c.id===ch.id) + 2);
+  }
+  renderWaypoints();
+}
+
+function closeModal(){
+  document.getElementById('overlay').classList.remove('open');
+}
+
+document.getElementById('overlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'overlay') closeModal();
+});
+
+renderWaypoints();
+</script>
+
+</body>
+</html>
